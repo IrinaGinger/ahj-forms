@@ -1,12 +1,25 @@
 import puppeteer from 'puppeteer';
+import { fork } from 'child_process';
+
+jest.setTimeout(30000);
 
 describe('form with popovers', () => {
   let browser = null;
   let page = null;
+  let server = null;
   
   const baseUrl = 'http://localhost:9000';
 
   beforeAll(async () => {
+    server = fork(`${__dirname}/e2e.server.js`);
+    await new Promise((resolve, reject) => {
+      server.on('error', reject);
+      server.on('message', (message) => {
+        if (message === 'ok') {
+          resolve();
+        }
+      });
+    });
     
     browser = await puppeteer.launch({
       headless: false, // show gui
@@ -17,8 +30,6 @@ describe('form with popovers', () => {
   });
 
   test('popover should be shown', async () => {
-    jest.setTimeout(30000);
-
     await page.goto(baseUrl);
 
     await page.waitForSelector('.form');
@@ -34,5 +45,6 @@ describe('form with popovers', () => {
 
   afterAll(async () => {
     await browser.close();
+    server.kill();
   });
 });

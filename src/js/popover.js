@@ -1,4 +1,4 @@
-export class Popover {
+export default class Popover {
     constructor() {
         this.popovers = [];
     }
